@@ -6,7 +6,7 @@ package designpatterns.observablepattern;
 public interface Observable {
 
     /**
-     * Registers an observer for stock updates.
+     * Registers an observer for state change notifications.
      *
      * @param observer observer to register
      */
@@ -20,7 +20,7 @@ public interface Observable {
     void removeObserver(Observer observer);
 
     /**
-     * Notifies all registered observers about a stock change.
+     * Notifies all registered observers about a state change.
      */
     void notifyObservers();
 }

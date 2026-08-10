@@ -1,7 +1,7 @@
 package designpatterns.observablepattern;
 
 /**
- * Contract for observer objects that receive stock change notifications.
+ * Contract for observer objects that receive state change notifications.
  */
 public interface Observer {
 
