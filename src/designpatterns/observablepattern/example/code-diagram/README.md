@@ -2,7 +2,7 @@
 
 This README is focused only on the Java code structure and call flow from:
 
-- `/home/runner/work/Backend---Java/Backend---Java/src/designpatterns/observablepattern/example/BackInStockNotificationExample.java`
+- `src/designpatterns/observablepattern/example/BackInStockNotificationExample.java`
 
 ## 1) Class/Type Relationship Diagram
 
