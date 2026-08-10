@@ -6,6 +6,7 @@ This folder gives a concrete version of how Amazon-like "notify me when availabl
 
 - `BackInStockNotificationExample.java` - runnable in-memory simulation of product/variant/subscription + event bus + worker.
 - `NOTIFICATION_FLOW_DIAGRAM.md` - full end-to-end diagrams of data flow, event flow, and worker filtering.
+- `code-diagram/README.md` - diagram-focused explanation of the Java code structure and runtime call flow.
 
 ---
 
@@ -101,3 +102,25 @@ Use CDC when centralized change capture is preferred or writer services cannot b
 - distributed workers act as observers
 
 So concept is same as Observer Pattern, but production implementation uses persistence + messaging + background consumers.
+
+---
+
+## Terminology notes (one-liners)
+
+- **Outbox pattern:** Reliability pattern where events are first saved in DB outbox rows inside the same transaction as business data change.
+- **Outbox relay:** Background process that reads pending outbox rows and publishes them to the message broker.
+- **Event bus:** Messaging layer that routes published events from producers to interested consumers.
+- **Topic:** Named event channel where producers publish and consumers subscribe.
+- **Queue:** Buffer that stores messages until a consumer processes them.
+- **Routing key:** Metadata key used by broker to match events to correct subscribers/queues.
+- **Consumer group:** Set of worker instances sharing one subscription to process messages in parallel.
+- **DLQ (Dead-Letter Queue):** Special queue for messages that repeatedly fail processing.
+- **Retry:** Re-processing attempt after temporary failure (network, timeout, provider error).
+- **Idempotency:** Property where repeated processing of the same event does not create duplicate side effects.
+- **Backpressure:** Controlled slowing of producers/consumers when downstream systems are overloaded.
+- **Observability:** Ability to monitor system behavior via logs, metrics, traces, and alerts.
+- **CDC (Change Data Capture):** Technique that converts database change logs into stream events.
+- **Binlog/redo log:** Database internal log that records row changes and is used by CDC tools.
+- **Debezium:** Popular CDC connector that reads DB logs and publishes structured events.
+- **Subscription:** User intent record linking a user to a variant and notification channel.
+- **Variant:** Specific sellable combination of product attributes (size/color or RAM/storage/camera).

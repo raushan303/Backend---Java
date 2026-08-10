@@ -163,3 +163,23 @@ Use CDC when you want standardized event capture from DB changes without modifyi
 - **Backpressure:** Queue decouples spike in stock updates from notification throughput.
 - **Observability:** Track publish lag, consumer lag, success/failure rate, and DLQ count.
 - **Policy:** Decide whether to keep subscription active after first notify.
+
+---
+
+## 7) Terminology notes (quick one-liners)
+
+- **Outbox table:** DB table storing pending events that must be published reliably.
+- **Outbox relay:** Background process that reads outbox rows and publishes them to broker.
+- **Broker:** Messaging system that accepts events and routes them to consumers.
+- **Topic/stream:** Named channel where related events are published.
+- **Subscription (broker-side):** Consumer binding that receives events from selected topic/routing rules.
+- **Routing:** Rule-based delivery of events to matching queues/subscriptions.
+- **Consumer:** Worker process that reads and handles events.
+- **DLQ (Dead-Letter Queue):** Queue for failed messages after retry limit.
+- **Retry:** Attempt to process same failed event again after delay/backoff.
+- **Idempotency:** Safe repeated handling of same event without duplicate user notifications.
+- **CDC:** Change Data Capture; turns database row changes into external events.
+- **Binlog/redo log:** Database internal transaction log used by CDC connectors.
+- **Debezium:** CDC connector that reads DB logs and emits structured events.
+- **ERP/WMS:** Upstream inventory systems (Enterprise Resource Planning / Warehouse Management System).
+- **Backpressure:** Throughput control to prevent worker/provider overload during event spikes.
