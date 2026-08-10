@@ -1,0 +1,28 @@
+package designpatterns.observablepattern.observable;
+
+import designpatterns.observablepattern.observer.Observer;
+
+/**
+ * Contract for observable objects that maintain and notify observers.
+ */
+public interface Observable {
+
+    /**
+     * Registers an observer for state change notifications.
+     *
+     * @param observer observer to register
+     */
+    void addObserver(Observer observer);
+
+    /**
+     * Removes an already registered observer.
+     *
+     * @param observer observer to remove
+     */
+    void removeObserver(Observer observer);
+
+    /**
+     * Notifies all registered observers about a state change.
+     */
+    void notifyObservers();
+}
