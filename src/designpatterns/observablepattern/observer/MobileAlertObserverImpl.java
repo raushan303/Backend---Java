@@ -1,6 +1,8 @@
-package designpatterns.observablepattern;
+package designpatterns.observablepattern.observer;
 
 import java.util.Objects;
+
+import designpatterns.observablepattern.observable.StockPriceObservable;
 
 /**
  * Observer implementation that displays stock alerts on mobile.

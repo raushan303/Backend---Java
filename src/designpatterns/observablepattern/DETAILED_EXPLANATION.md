@@ -21,6 +21,24 @@ With this pattern, subscribers register once, and the publisher only notifies th
 - `NotificationAlertObserver` - Push notification subscriber
 - `MobileAlertObserverImpl` - Mobile alert subscriber
 
+### Folder grouping
+
+```text
+observablepattern/
+├── observable/
+│   ├── Observable.java
+│   ├── StockPriceObservable.java
+│   └── StocksObservable.java
+├── observer/
+│   ├── Observer.java
+│   ├── IphoneObserverImpl.java
+│   ├── EmailAlertObserverImpl.java
+│   ├── NotificationAlertObserver.java
+│   └── MobileAlertObserverImpl.java
+├── SHORT_EXPLANATION.md
+└── DETAILED_EXPLANATION.md
+```
+
 ---
 
 ## 3) Class diagram (text)

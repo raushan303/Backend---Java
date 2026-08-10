@@ -1,4 +1,4 @@
-package designpatterns.observablepattern;
+package designpatterns.observablepattern.observable;
 
 /**
  * Stock-specific observable contract exposing stock price data.

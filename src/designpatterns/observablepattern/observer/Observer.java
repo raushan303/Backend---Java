@@ -1,4 +1,4 @@
-package designpatterns.observablepattern;
+package designpatterns.observablepattern.observer;
 
 /**
  * Contract for observer objects that receive state change notifications.

@@ -1,4 +1,6 @@
-package designpatterns.observablepattern;
+package designpatterns.observablepattern.observable;
+
+import designpatterns.observablepattern.observer.Observer;
 
 /**
  * Contract for observable objects that maintain and notify observers.

@@ -1,7 +1,9 @@
-package designpatterns.observablepattern;
+package designpatterns.observablepattern.observable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import designpatterns.observablepattern.observer.Observer;
 
 /**
  * Observable implementation that tracks stock price updates.
