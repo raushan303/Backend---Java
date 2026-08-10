@@ -1,10 +1,9 @@
-package designpatterns.observablepattern.exmaple;
+package designpatterns.observablepattern.example;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -221,12 +220,14 @@ public class BackInStockNotificationExample {
 
         @Override
         public Set<EventType> subscribedEventTypes() {
-            return new HashSet<>(Set.of(EventType.VARIANT_STOCK_CHANGED));
+            return Set.of(EventType.VARIANT_STOCK_CHANGED);
         }
 
         @Override
         public void onEvent(DomainEvent event) {
-            VariantStockChangedEvent stockEvent = (VariantStockChangedEvent) event;
+            if (!(event instanceof VariantStockChangedEvent stockEvent)) {
+                return;
+            }
             if (!stockEvent.movedFromOutOfStockToInStock()) {
                 return;
             }
