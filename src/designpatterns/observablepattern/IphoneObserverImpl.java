@@ -7,10 +7,10 @@ import java.util.Objects;
  */
 public class IphoneObserverImpl implements Observer {
 
-    private final StocksObservable observable;
+    private final StockPriceObservable observable;
     private final String userName;
 
-    public IphoneObserverImpl(String userName, StocksObservable observable) {
+    public IphoneObserverImpl(String userName, StockPriceObservable observable) {
         this.userName = Objects.requireNonNull(userName, "User name cannot be null");
         this.observable = Objects.requireNonNull(observable, "Observable cannot be null");
     }

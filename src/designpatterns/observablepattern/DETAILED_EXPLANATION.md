@@ -13,6 +13,7 @@ With this pattern, subscribers register once, and the publisher only notifies th
 ## 2) Core participants in this folder
 
 - `Observable` - Publisher contract (`addObserver`, `removeObserver`, `notifyObservers`)
+- `StockPriceObservable` - Stock-specific extension contract (`setStockPrice`, `getStockPrice`)
 - `Observer` - Subscriber contract (`update`)
 - `StocksObservable` - Concrete publisher that stores observers and broadcasts stock price changes
 - `IphoneObserverImpl` - iPhone display alert subscriber
@@ -34,6 +35,11 @@ With this pattern, subscribers register once, and the publisher only notifies th
                       +---------^--------+
                                 |
                                 |
+                    +----------------------+
+                    | StockPriceObservable |
+                    +----------^-----------+
+                               |
+                               |
                       +------------------+
                       | StocksObservable |
                       +------------------+

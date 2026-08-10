@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Observable implementation that tracks stock price updates.
  */
-public class StocksObservable implements Observable {
+public class StocksObservable implements StockPriceObservable {
 
     private final List<Observer> observers = new ArrayList<>();
     private double stockPrice;
@@ -43,6 +43,7 @@ public class StocksObservable implements Observable {
      *
      * @param stockPrice latest stock price
      */
+    @Override
     public void setStockPrice(double stockPrice) {
         if (stockPrice < 0) {
             throw new IllegalArgumentException("Stock price cannot be negative");
@@ -59,6 +60,7 @@ public class StocksObservable implements Observable {
      *
      * @return current stock price
      */
+    @Override
     public double getStockPrice() {
         return stockPrice;
     }

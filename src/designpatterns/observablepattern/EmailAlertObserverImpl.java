@@ -7,10 +7,10 @@ import java.util.Objects;
  */
 public class EmailAlertObserverImpl implements Observer {
 
-    private final StocksObservable observable;
+    private final StockPriceObservable observable;
     private final String email;
 
-    public EmailAlertObserverImpl(String email, StocksObservable observable) {
+    public EmailAlertObserverImpl(String email, StockPriceObservable observable) {
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.observable = Objects.requireNonNull(observable, "Observable cannot be null");
     }

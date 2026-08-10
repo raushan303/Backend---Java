@@ -7,10 +7,10 @@ import java.util.Objects;
  */
 public class NotificationAlertObserver implements Observer {
 
-    private final StocksObservable observable;
+    private final StockPriceObservable observable;
     private final String deviceToken;
 
-    public NotificationAlertObserver(String deviceToken, StocksObservable observable) {
+    public NotificationAlertObserver(String deviceToken, StockPriceObservable observable) {
         this.deviceToken = Objects.requireNonNull(deviceToken, "Device token cannot be null");
         this.observable = Objects.requireNonNull(observable, "Observable cannot be null");
     }
