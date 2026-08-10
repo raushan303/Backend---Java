@@ -138,7 +138,7 @@ These checks prevent invalid state and unnecessary notification noise.
 
 1. Depend on abstractions (`Observable`, `Observer`) rather than concrete classes.
 2. Keep observer `update()` lightweight.
-3. Validate incoming data before notify.
+3. Validate incoming data before notifying.
 4. Prevent duplicate registration unless duplicates are explicitly needed.
 5. Provide unsubscribe support to avoid stale listeners.
 
