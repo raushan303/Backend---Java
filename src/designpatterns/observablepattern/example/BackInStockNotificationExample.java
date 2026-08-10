@@ -15,10 +15,14 @@ import java.util.Set;
 public class BackInStockNotificationExample {
 
     public static void main(String[] args) {
+        // Simulated repositories (in real systems these are DB-backed repositories).
         ProductCatalogRepository catalogRepository = new ProductCatalogRepository();
         SubscriptionRepository subscriptionRepository = new SubscriptionRepository();
+
+        // Simulated event infrastructure (in real systems this is Kafka/SNS+SQS/Service Bus etc.).
         InMemoryEventBus eventBus = new InMemoryEventBus();
 
+        // Worker subscribes only to stock-change events and sends notifications.
         NotificationService notificationService = new NotificationService();
         BackInStockWorker backInStockWorker = new BackInStockWorker(subscriptionRepository, notificationService);
         eventBus.register(backInStockWorker);
@@ -42,6 +46,7 @@ public class BackInStockNotificationExample {
         subscriptionRepository.addSubscription(new Subscription("S-1", "USER-101", "V-TSHIRT-M", "email"));
         subscriptionRepository.addSubscription(new Subscription("S-2", "USER-202", "V-PHONE-128-8", "push"));
 
+        // Inventory update publishes stock-changed events.
         inventoryService.updateVariantStock("V-TSHIRT-M", 10);
         inventoryService.updateVariantStock("V-PHONE-128-8", 7);
     }
@@ -63,6 +68,7 @@ public class BackInStockNotificationExample {
         }
 
         boolean movedFromOutOfStockToInStock() {
+            // Notify only when variant becomes available.
             return oldQuantity <= 0 && newQuantity > 0;
         }
     }
@@ -75,6 +81,7 @@ public class BackInStockNotificationExample {
 
     static class InMemoryEventBus {
 
+        // Event-type-wise subscriber registry. This is equivalent to topic-based routing.
         private final Map<EventType, List<EventSubscriber>> subscriberMap = new EnumMap<>(EventType.class);
 
         void register(EventSubscriber subscriber) {
@@ -86,6 +93,7 @@ public class BackInStockNotificationExample {
 
         void publish(DomainEvent event) {
             Objects.requireNonNull(event, "Event cannot be null");
+            // Only subscribers for this exact event type will receive the event.
             List<EventSubscriber> subscribers = subscriberMap.getOrDefault(event.type(), Collections.emptyList());
             for (EventSubscriber subscriber : subscribers) {
                 subscriber.onEvent(event);
@@ -125,6 +133,7 @@ public class BackInStockNotificationExample {
             if (newQuantity < 0) {
                 throw new IllegalArgumentException("Quantity cannot be negative");
             }
+            // Return old quantity so publisher can emit before/after values in event payload.
             int oldQuantity = this.quantity;
             this.quantity = newQuantity;
             return oldQuantity;
@@ -186,6 +195,7 @@ public class BackInStockNotificationExample {
         }
 
         List<Subscription> findByVariantId(String variantId) {
+            // DB equivalent: SELECT * FROM subscriptions WHERE variant_id = ? AND status = 'active'
             return subscriptionsByVariantId.getOrDefault(variantId, List.of());
         }
     }
@@ -202,6 +212,7 @@ public class BackInStockNotificationExample {
         void updateVariantStock(String variantId, int newQuantity) {
             Variant variant = catalogRepository.getVariant(variantId);
             int oldQuantity = variant.updateQuantity(newQuantity);
+            // App-published event path: service writes state change and publishes integration event.
             eventBus.publish(new VariantStockChangedEvent(variantId, oldQuantity, newQuantity));
         }
     }
@@ -220,6 +231,7 @@ public class BackInStockNotificationExample {
 
         @Override
         public Set<EventType> subscribedEventTypes() {
+            // Worker declares explicit interest to avoid handling unrelated events.
             return Set.of(EventType.VARIANT_STOCK_CHANGED);
         }
 
@@ -229,9 +241,11 @@ public class BackInStockNotificationExample {
                 return;
             }
             if (!stockEvent.movedFromOutOfStockToInStock()) {
+                // Ignore in-stock->in-stock and in-stock->out-of-stock for this use case.
                 return;
             }
 
+            // Fetch only subscribers of this specific variant and notify through configured channels.
             List<Subscription> subscriptions = subscriptionRepository.findByVariantId(stockEvent.variantId());
             for (Subscription subscription : subscriptions) {
                 notificationService.send(subscription, stockEvent.variantId());
