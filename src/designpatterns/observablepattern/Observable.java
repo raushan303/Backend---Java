@@ -23,18 +23,4 @@ public interface Observable {
      * Notifies all registered observers about a stock change.
      */
     void notifyObservers();
-
-    /**
-     * Updates the latest stock price and triggers observer notification.
-     *
-     * @param stockPrice latest stock price
-     */
-    void setStockPrice(double stockPrice);
-
-    /**
-     * Returns the current stock price.
-     *
-     * @return current stock price
-     */
-    double getStockPrice();
 }

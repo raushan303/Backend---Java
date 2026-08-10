@@ -38,7 +38,11 @@ public class StocksObservable implements Observable {
         }
     }
 
-    @Override
+    /**
+     * Updates the latest stock price and notifies observers when value changes.
+     *
+     * @param stockPrice latest stock price
+     */
     public void setStockPrice(double stockPrice) {
         if (stockPrice < 0) {
             throw new IllegalArgumentException("Stock price cannot be negative");
@@ -50,7 +54,11 @@ public class StocksObservable implements Observable {
         }
     }
 
-    @Override
+    /**
+     * Returns the current stock price.
+     *
+     * @return current stock price
+     */
     public double getStockPrice() {
         return stockPrice;
     }

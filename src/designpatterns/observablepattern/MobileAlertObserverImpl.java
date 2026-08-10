@@ -7,10 +7,10 @@ import java.util.Objects;
  */
 public class MobileAlertObserverImpl implements Observer {
 
-    private final Observable observable;
+    private final StocksObservable observable;
     private final String mobileNumber;
 
-    public MobileAlertObserverImpl(String mobileNumber, Observable observable) {
+    public MobileAlertObserverImpl(String mobileNumber, StocksObservable observable) {
         this.mobileNumber = Objects.requireNonNull(mobileNumber, "Mobile number cannot be null");
         this.observable = Objects.requireNonNull(observable, "Observable cannot be null");
     }
