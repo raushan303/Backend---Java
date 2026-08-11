@@ -6,6 +6,7 @@ import designpatterns.decoratorpattern.component.Coffee;
  * Adds milk to an existing coffee order.
  */
 public class MilkDecorator extends CoffeeDecorator {
+    private static final double MILK_COST = 20.0;
 
     public MilkDecorator(Coffee coffee) {
         super(coffee);
@@ -18,6 +19,6 @@ public class MilkDecorator extends CoffeeDecorator {
 
     @Override
     public double getCost() {
-        return coffee.getCost() + 20.0;
+        return coffee.getCost() + MILK_COST;
     }
 }

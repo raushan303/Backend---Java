@@ -4,6 +4,7 @@ package designpatterns.decoratorpattern.component;
  * Basic coffee implementation that can be decorated at runtime.
  */
 public class BasicCoffee implements Coffee {
+    private static final double BASE_COST = 80.0;
 
     @Override
     public String getDescription() {
@@ -12,6 +13,6 @@ public class BasicCoffee implements Coffee {
 
     @Override
     public double getCost() {
-        return 80.0;
+        return BASE_COST;
     }
 }

@@ -6,6 +6,7 @@ import designpatterns.decoratorpattern.component.Coffee;
  * Adds sugar to an existing coffee order.
  */
 public class SugarDecorator extends CoffeeDecorator {
+    private static final double SUGAR_COST = 5.0;
 
     public SugarDecorator(Coffee coffee) {
         super(coffee);
@@ -18,6 +19,6 @@ public class SugarDecorator extends CoffeeDecorator {
 
     @Override
     public double getCost() {
-        return coffee.getCost() + 5.0;
+        return coffee.getCost() + SUGAR_COST;
     }
 }
