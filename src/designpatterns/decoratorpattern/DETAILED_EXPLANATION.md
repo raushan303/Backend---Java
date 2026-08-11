@@ -49,6 +49,7 @@ decoratorpattern/
 │   ├── OrderPricingDecoratorExample.java
 │   └── README.md
 ├── DecoratorPatternDemo.java
+├── README.md
 ├── SHORT_EXPLANATION.md
 └── DETAILED_EXPLANATION.md
 ```
@@ -70,7 +71,7 @@ decoratorpattern/
       +-------------------+      +----------------------+
       |    BasicCoffee    |      |   CoffeeDecorator    |
       +-------------------+      +----------------------+
-                                 | -coffee              |
+                                 | -coffee: Coffee      |
                                  +----------^-----------+
                                             |
              +------------------------------+-----------------------------+
