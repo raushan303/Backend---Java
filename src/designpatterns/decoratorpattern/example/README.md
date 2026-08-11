@@ -37,6 +37,66 @@ With decorators:
 
 ---
 
+## Core decorator Q&A
+
+### Q1) What relation does `MilkDecorator` have with `Coffee`?
+
+**Answer:** `MilkDecorator` has both relations:
+
+- **is-a `Coffee`** because `MilkDecorator` extends `CoffeeDecorator`, and `CoffeeDecorator` implements `Coffee`
+- **has-a `Coffee`** because the decorator stores a wrapped `Coffee` object in the `coffee` field
+
+This combination is the key idea of the Decorator Pattern:
+
+- **is-a** lets the decorator be used anywhere a `Coffee` is expected
+- **has-a** lets the decorator reuse the wrapped object's behavior and add extra behavior on top
+
+### Q2) Why does the decorator implement `Coffee` if it already has the same methods?
+
+**Answer:** It implements `Coffee` so the decorated object and the base object share the same contract.
+
+That means client code can write:
+
+- `Coffee coffee = new BasicCoffee()`
+- `Coffee coffee = new MilkDecorator(new BasicCoffee())`
+
+without changing how it uses the object.
+
+This is not useless duplication:
+
+- `BasicCoffee` provides the base behavior
+- `MilkDecorator` calls the wrapped `Coffee` and then adds its own behavior
+- both follow the same `Coffee` contract, so they are interchangeable from the client's point of view
+
+---
+
+## Class diagram for core coffee decorators
+
+```text
+                    +------------------+
+                    |      Coffee      |
+                    +------------------+
+                    | +getDescription()|
+                    | +getCost()       |
+                    +--------^---------+
+                             |
+               +-------------+-------------+
+               |                           |
+      +-------------------+      +----------------------+
+      |    BasicCoffee    |      |   CoffeeDecorator    |
+      +-------------------+      +----------------------+
+                                 | -coffee: Coffee      |
+                                 +----------^-----------+
+                                            |
+             +------------------------------+-----------------------------+
+             |                              |                             |
+   +--------------------+         +--------------------+      +-------------------------+
+   |   MilkDecorator    |         |   SugarDecorator   |      | WhippedCreamDecorator   |
+   +--------------------+         +--------------------+      +-------------------------+
+```
+
+---
+
 ## Runtime flow
 
 ```text
