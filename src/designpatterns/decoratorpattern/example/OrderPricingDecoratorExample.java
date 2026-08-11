@@ -59,6 +59,7 @@ public class OrderPricingDecoratorExample {
     }
 
     static class GiftWrapDecorator extends OrderOptionDecorator {
+        private static final double GIFT_WRAP_COST = 80.0;
 
         GiftWrapDecorator(Order order) {
             super(order);
@@ -71,11 +72,12 @@ public class OrderPricingDecoratorExample {
 
         @Override
         public double totalCost() {
-            return order.totalCost() + 80.0;
+            return order.totalCost() + GIFT_WRAP_COST;
         }
     }
 
     static class PriorityShippingDecorator extends OrderOptionDecorator {
+        private static final double PRIORITY_SHIPPING_COST = 150.0;
 
         PriorityShippingDecorator(Order order) {
             super(order);
@@ -88,11 +90,12 @@ public class OrderPricingDecoratorExample {
 
         @Override
         public double totalCost() {
-            return order.totalCost() + 150.0;
+            return order.totalCost() + PRIORITY_SHIPPING_COST;
         }
     }
 
     static class PurchaseProtectionDecorator extends OrderOptionDecorator {
+        private static final double PURCHASE_PROTECTION_COST = 60.0;
 
         PurchaseProtectionDecorator(Order order) {
             super(order);
@@ -105,7 +108,7 @@ public class OrderPricingDecoratorExample {
 
         @Override
         public double totalCost() {
-            return order.totalCost() + 60.0;
+            return order.totalCost() + PURCHASE_PROTECTION_COST;
         }
     }
 }
