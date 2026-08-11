@@ -10,6 +10,14 @@ The five principles are:
 - **I** — Interface Segregation Principle
 - **D** — Dependency Inversion Principle
 
+## Interview-ready descriptions
+
+- **Single Responsibility Principle (SRP):** A class should have one clear responsibility and only one reason to change.
+- **Open/Closed Principle (OCP):** Code should allow new behavior to be added without changing existing, tested behavior.
+- **Liskov Substitution Principle (LSP):** A child class should work correctly anywhere its parent type is expected without breaking the program.
+- **Interface Segregation Principle (ISP):** Classes should depend only on small, focused interfaces that contain the methods they actually need.
+- **Dependency Inversion Principle (DIP):** High-level and low-level classes should depend on abstractions, such as interfaces, instead of depending directly on each other.
+
 ---
 
 # Why SOLID matters

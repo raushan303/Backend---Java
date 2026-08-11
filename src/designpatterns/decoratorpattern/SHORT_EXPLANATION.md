@@ -1,6 +1,8 @@
 # Decorator Pattern
 
-The **Decorator Pattern** lets you add behavior or responsibilities to an object dynamically without modifying its original class.
+## Interview description
+
+The **Decorator Pattern** adds behavior to an object dynamically by wrapping it with another object that follows the same interface. It extends functionality without modifying the original class or creating many subclasses.
 
 In this implementation:
 - `component/` contains the base contract and simple object (`Coffee`, `BasicCoffee`).

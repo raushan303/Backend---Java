@@ -1,6 +1,8 @@
 # Observable Pattern
 
-The **Observable Pattern** (Observer Pattern) defines a one-to-many relationship between objects. When the observable object changes state, all registered observers are notified automatically.
+## Interview description
+
+The **Observable Pattern** (Observer Pattern) creates a one-to-many relationship between objects. When the observable changes, it automatically notifies every registered observer without being tightly coupled to them.
 
 In this implementation:
 - `observable/` contains publisher-side contracts and implementation (`Observable`, `StockPriceObservable`, `StocksObservable`).

@@ -1,5 +1,9 @@
 # Strategy Pattern
 
+## Interview description
+
+The **Strategy Pattern** puts different ways of performing the same task into separate classes with a common interface. The client can choose or switch the required behavior at runtime without large `if-else` blocks.
+
 ## Intent
 
 The **Strategy Pattern** lets you define a family of algorithms, put each one in a separate class, and make them interchangeable at runtime.
