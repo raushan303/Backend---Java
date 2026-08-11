@@ -50,7 +50,7 @@ public class OrderPricingDecoratorExample {
         }
     }
 
-    static abstract class OrderOptionDecorator implements Order {
+    abstract static class OrderOptionDecorator implements Order {
         protected final Order order;
 
         OrderOptionDecorator(Order order) {
