@@ -101,6 +101,12 @@ For each topic:
 
 This repo is meant for experimentation and learning, not production code.
 
+## System design / interview topics
+
+- [`src/systemdesign/event-driven-architecture/`](./src/systemdesign/event-driven-architecture/README.md) —
+  Outbox pattern, message brokers (Kafka, SQS/SNS, Azure Event Hub/Service Bus), idempotency and
+  delivery guarantees, and a dedicated interview Q&A file.
+
 ## Next steps
 
 - Add your first design pattern example

@@ -8,6 +8,10 @@ This folder gives a concrete version of how Amazon-like "notify me when availabl
 - `NOTIFICATION_FLOW_DIAGRAM.md` - full end-to-end diagrams of data flow, event flow, and worker filtering.
 - `code-diagram/README.md` - diagram-focused explanation of the Java code structure and runtime call flow.
 
+For how this simplified in-memory event bus maps to real production systems (Kafka/SQS/Event Hub,
+the Transactional Outbox pattern, and idempotency for notification delivery), see
+[`src/systemdesign/event-driven-architecture/`](../../../systemdesign/event-driven-architecture/README.md).
+
 ---
 
 ## Q1) Do we have one product table for all products and one variants table for all variants?
