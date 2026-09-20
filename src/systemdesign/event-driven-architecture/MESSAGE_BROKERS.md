@@ -416,6 +416,8 @@ Use SQS for:
 - Running retryable jobs.
 - Decoupling a web request from slow work.
 
+Operational notes:
+
 - After a worker successfully processes an SQS message, it explicitly deletes the message with `DeleteMessage`; otherwise, the message can become visible again and be retried.
 - SQS is not meant to be a long-term replayable event history like Kafka.
 - SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
