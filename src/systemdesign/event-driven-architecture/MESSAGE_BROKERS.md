@@ -141,6 +141,8 @@ offset 3: OrderDelivered(orderId=123)
 
 It does not insert the new event in the middle or rewrite offset 1. This makes Kafka fast and makes replay possible because consumers can say, "start reading again from offset 0" or "continue from offset 3."
 
+Related term: **log compaction** is a Kafka cleanup mode that keeps the latest message for each key instead of keeping every old message forever. For example, a compacted `latest-stock-level` topic can keep the newest stock value for each `variantId`.
+
 This does **not** mean Kafka is a normal relational database. Kafka stores event records and metadata; it is optimized for sequential event storage and delivery. A database is optimized for querying and updating current application state. Many systems use both:
 
 ```text
@@ -414,7 +416,7 @@ Use SQS for:
 - Running retryable jobs.
 - Decoupling a web request from slow work.
 
-SQS messages are deleted after successful processing. SQS is not meant to be a long-term replayable event history like Kafka.
+SQS messages are deleted after successful processing. SQS is not meant to be a long-term replayable event history like Kafka. SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
 
 ### SNS: pub-sub fan-out
 
