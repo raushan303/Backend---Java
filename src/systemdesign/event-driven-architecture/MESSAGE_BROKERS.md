@@ -186,8 +186,6 @@ Partition 1: [0] [1] [2] [3]
 Partition 2: [0] [1] [2] [3]
 ```
 
-A partition does **not** mean every event goes to every partition. For one Kafka topic, each event is written to **one** partition of that topic.
-
 Kafka chooses the partition by:
 
 - a message key, commonly hashed, such as `orderId`; or
@@ -399,9 +397,10 @@ Why Kafka helps:
 AWS SQS is a managed queue.
 
 ```text
-Order Service ---> SQS queue ---> Email Worker 1
-                           |---> Email Worker 2
-                           |---> Email Worker 3
+Order Service ---> SQS queue: [email job 1] [email job 2] [email job 3]
+                                  |             |             |
+                              Worker 1      Worker 2      Worker 3
+                         (each job goes to one worker, not all workers)
 ```
 
 If there are 1,000 email jobs and 3 workers, SQS distributes jobs across workers. Each email job is normally handled by one worker.
