@@ -226,8 +226,8 @@ In Kafka, partitions are the unit of parallelism inside a consumer group. If the
 Partition 0 ---> Consumer A
 Partition 1 ---> Consumer B
 Partition 2 ---> Consumer C
-Consumer D ---> idle
-Consumer E ---> idle
+Consumer D: idle
+Consumer E: idle
 ```
 
 ### Offset
@@ -336,7 +336,7 @@ orders partition 0 copies:
 - Broker 3: follower copy
 ```
 
-Producers and consumers talk to the leader copy. Followers keep copying data from the leader.
+By default, producers and consumers talk to the leader copy. Followers keep copying data from the leader.
 
 If Broker 1 dies, Kafka can elect one follower as the new leader:
 
