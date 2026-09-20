@@ -183,9 +183,9 @@ A topic can have multiple partitions:
 ```text
 Topic: orders
 
-Partition 0: [0] [1] [2] [3]
-Partition 1: [0] [1] [2] [3]
-Partition 2: [0] [1] [2] [3]
+Partition 0: offsets 0,1,2,3 (its own messages)
+Partition 1: offsets 0,1,2,3 (its own messages)
+Partition 2: offsets 0,1,2,3 (its own messages)
 ```
 
 The producer's Kafka client chooses the partition by:
@@ -416,7 +416,9 @@ Use SQS for:
 - Running retryable jobs.
 - Decoupling a web request from slow work.
 
-After a worker successfully processes an SQS message, it explicitly deletes the message with `DeleteMessage`; otherwise, the message can become visible again and be retried. SQS is not meant to be a long-term replayable event history like Kafka. SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
+- After a worker successfully processes an SQS message, it explicitly deletes the message with `DeleteMessage`; otherwise, the message can become visible again and be retried.
+- SQS is not meant to be a long-term replayable event history like Kafka.
+- SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
 
 ### SNS: pub-sub fan-out
 
