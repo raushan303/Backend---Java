@@ -19,10 +19,17 @@ A separate background process that polls (or uses CDC to stream) unsent rows fro
 and publishes them to the real broker (Kafka/SQS/etc.), marking them sent afterward.
 
 **Q4. What is CDC (Change Data Capture) and how does Debezium fit in?**
-CDC means reading a database's internal write-ahead log/binlog (the log the DB already uses for
-replication) to capture row-level changes in near real time, instead of polling tables with SQL
-queries. Debezium is the most common open-source CDC tool, typically paired with Kafka Connect to
-stream outbox rows into Kafka with low latency and no extra query load on the database.
+CDC captures committed database changes by reading the database's internal transaction log instead of
+repeatedly polling tables with SQL. PostgreSQL exposes its WAL through logical decoding; MySQL CDC
+normally reads the binlog. Debezium reads from a saved log position, converts committed outbox inserts
+into events, and uses Kafka Connect to publish them to Kafka. After a restart it resumes from its saved
+position, although a change can still be published twice around a crash.
+
+**Q4a. Is a write-ahead log just a temporary file used while writing to the DB?**
+No. It is a durable set of files managed by the database. The database makes a transaction's log
+records durable before it must flush the changed table pages to their final data files. After a crash,
+it uses the log to restore committed changes. Old segments are recycled or deleted only when no longer
+needed for recovery, replication, backups, or CDC.
 
 **Q5. Why can duplicate events happen even with the outbox pattern?**
 If the outbox relay crashes after publishing but before marking a row as sent, it will republish that
@@ -35,10 +42,19 @@ across independent systems, so it's usually approximated as "at-least-once + ide
 
 **Q7. How do you make a notification-sending consumer idempotent?**
 Derive a deterministic idempotency key from the event (e.g., hash of userId + variantId + eventType).
-Before sending, insert that key into a dedup table with a unique constraint; if the insert fails
-(duplicate key), skip sending — it was already handled. Optionally also pass the same idempotency key
-to the external provider's (WhatsApp/SMS/etc.) send API so retried HTTP calls don't cause duplicate
-sends at the network layer too.
+Insert it into a delivery table with a unique constraint and status such as `PENDING` or `SENT`. Skip
+only a `SENT` notification; retry a stale `PENDING` notification because its previous worker may have
+crashed before sending. Pass the same key to the external provider, then mark the row `SENT` after the
+provider confirms success. Provider-side idempotency makes a retry safe if the provider sent the
+message but the worker crashed before updating its database.
+
+**Q7a. Can the local dedup table alone guarantee exactly one WhatsApp message?**
+No. If the worker crashes after creating the DB row but before calling WhatsApp, treating row existence
+as completion loses the message. If it crashes after WhatsApp accepts the request but before marking
+the row `SENT`, retrying can duplicate the message. A provider idempotency key or provider lookup by
+client request ID closes that ambiguity. Without provider support, no local DB algorithm can make the
+external API call atomic with the local transaction; the design must accept a small loss-or-duplicate
+trade-off and reconcile uncertain outcomes.
 
 **Q8. Why use a unique DB constraint instead of a "check-then-send" in-memory or read-then-write
 check?**

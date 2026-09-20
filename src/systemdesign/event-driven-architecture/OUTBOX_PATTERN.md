@@ -82,10 +82,86 @@ as volume grows.
 
 ### 2. Change Data Capture (CDC) — e.g., Debezium (common at larger scale)
 
-Instead of an app polling the table, a CDC tool (most commonly **Debezium**) reads the database's
-**write-ahead log / binlog / WAL** directly (the same internal log the DB uses for replication) and
-streams every insert into the `outbox` table straight into Kafka, in near real time, without adding
-query load on the database. This is the more scalable, lower-latency version of the same idea.
+Instead of repeatedly querying the `outbox` table, a CDC tool watches the database's own transaction
+log. When it sees a committed insert into `outbox`, it converts that change into an event and publishes
+it to Kafka. **Debezium** is a common tool that does this.
+
+### What is a write-ahead log (WAL)?
+
+A database usually stores table data in large data files made of pages. Rewriting all affected pages
+on every `COMMIT` would be slow. Instead, it first appends a smaller description of the change to a
+sequential, durable log on disk:
+
+```
+Application: UPDATE variants ... + INSERT INTO outbox ...
+                         |
+                         v
+Database appends change records to its transaction log
+                         |
+                    COMMIT record
+                         |
+                         v
+Database confirms COMMIT to the application
+                         |
+                         v
+Changed table pages may be flushed to their data files later
+```
+
+It is called **write-ahead** because the log record is made durable *before* the changed table page
+must be written to its final data file. If the database process or machine crashes after `COMMIT` but
+before those pages are flushed, the database reads the log during startup and restores the committed
+changes. It can also identify transactions that never committed and keep them from becoming visible.
+
+The log is not a temporary file created by the application between an SQL statement and the database.
+It is a set of durable files managed internally by the database itself. Old log segments are normally
+archived, recycled, or deleted after the database no longer needs them for crash recovery,
+replication, backups, or CDC consumers. A stalled CDC consumer can therefore increase log storage
+usage until it catches up, depending on the database's retention configuration.
+
+Different databases use related but not identical logs:
+
+| Database | Log commonly used for CDC |
+|---|---|
+| PostgreSQL | WAL, exposed as logical changes through logical decoding |
+| MySQL | Binary log (`binlog`); this is distinct from InnoDB's internal redo log |
+| SQL Server | Transaction log |
+| MongoDB | Oplog |
+
+### How Debezium reads an outbox change
+
+Consider the transaction from the earlier example:
+
+1. The application starts one database transaction.
+2. It updates `variants` and inserts an `outbox` row.
+3. The database records both changes in its transaction log and records the commit.
+4. Debezium's database connector reads the log from its last saved position.
+5. Debezium ignores uncommitted/rolled-back changes and receives the committed `outbox` insert.
+6. The Debezium outbox event router extracts fields such as event ID, type, aggregate ID, and payload.
+7. Kafka Connect publishes the resulting event to the configured Kafka topic.
+8. The connector saves how far it has read (for example, a PostgreSQL log position or MySQL binlog
+   file and offset), so after a restart it continues from that position.
+
+```text
+Application -> Database transaction -> WAL/binlog -> Debezium connector -> Kafka Connect -> Kafka
+                     |                      |
+                     |                      +-- reads committed changes in order
+                     +-- variants row and outbox row commit together
+```
+
+This gives low-latency publication without repeatedly running `SELECT ... WHERE sent = false` against
+the business tables. It also captures the order in which changes were committed.
+
+### Does CDC make delivery exactly-once?
+
+No. Debezium and Kafka Connect persist their read position, but a crash can still occur around
+"publish event" and "save new position." On recovery, a change may be published again. The outbox row
+must therefore have a stable event ID, and consumers must still be idempotent.
+
+With CDC, the application usually does not use the polling relay's `sent` flag. It keeps outbox rows
+for an agreed retention period and deletes or archives them with a separate cleanup job only after the
+CDC pipeline has had enough time to capture them. The transaction log and the outbox table are
+different durable records: the log drives CDC; the table is the application's transactional event
+record.
 
 ## Why not just publish directly and retry on failure?
 
