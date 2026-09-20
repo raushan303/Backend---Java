@@ -95,6 +95,8 @@ Real-world examples:
 
 Common tools: **AWS SNS**, **Azure Event Grid**, **RabbitMQ exchanges**, and also **Kafka** when different consumer groups read the same topic.
 
+In this repository, [`BackInStockNotificationExample.java`](../../designpatterns/observablepattern/example/BackInStockNotificationExample.java) uses an in-memory event bus to demonstrate this pub-sub idea: one stock-change event can notify multiple subscribers. It is only a teaching example, not a real broker, because it has no persistence, replay, partitions, or separate broker machine.
+
 ### C. Event streaming: a durable history of events
 
 An **event streaming platform** stores events as a durable stream/history that consumers can read at their own speed.
@@ -267,11 +269,11 @@ Partition 1 ---> Analytics Consumer B
 
 Both services can read all `orders` events, but each service scales its own workers separately.
 
-Consumer groups are not mainly about "10 consumers subscribed to a topic must each get a different topic." They are about distributing partitions of the **same topic** among instances of the **same logical service**.
+Consumer groups are not mainly about making every consumer receive every message. They are about distributing partitions of the **same topic** among instances of the **same logical service**, so the service can scale without duplicating the same work inside that group.
 
-### Does every partition get every topic?
+### How do topics and partitions relate?
 
-No.
+Partitions are inside topics, and one event is written to one partition of its topic.
 
 Correct mental model:
 
@@ -398,8 +400,8 @@ AWS SQS is a managed queue.
 
 ```text
 Order Service ---> SQS queue ---> Email Worker 1
-                              ---> Email Worker 2
-                              ---> Email Worker 3
+                           |---> Email Worker 2
+                           |---> Email Worker 3
 ```
 
 If there are 1,000 email jobs and 3 workers, SQS distributes jobs across workers. Each email job is normally handled by one worker.
