@@ -208,7 +208,7 @@ Using a stable key is important because it keeps related events in the same part
 
 Partitions provide parallelism and scale.
 
-If one partition can be read by one consumer in a consumer group, then three partitions can be read by up to three consumers in the same group:
+Because a partition is assigned to at most one consumer in a consumer group, three partitions can be read by up to three consumers in the same group:
 
 ```text
 Topic: orders, Consumer group: notification-service
@@ -483,7 +483,7 @@ RabbitMQ is often chosen when you need flexible routing rules, classic work queu
 | **Kafka** | Streaming log | Many consumer groups can each read the same events | Within a partition | Yes, within retention | High-volume event streams, analytics, event-driven microservices |
 | **Azure Event Hub** | Streaming log | Many consumer groups can each read the same events | Within a partition | Yes, within retention | Kafka-like cloud event ingestion |
 | **SQS** | Queue | Typically one worker per message; at-least-once delivery means duplicates are possible | Standard: no strict order; FIFO: ordered | No long-term replay after delete | Background jobs and task distribution |
-| **SNS** | Pub-sub topic | Many subscribers | No strong ordering | No | Fan-out notifications |
+| **SNS** | Pub-sub topic | Many subscribers | Standard: no ordering; FIFO topics: ordered | No | Fan-out notifications |
 | **Azure Service Bus** | Queue or topic/subscription | Queue: typically one worker; topic: many subscriptions | Sessions can preserve order | Not a Kafka-style replay log | Enterprise queues/pub-sub |
 | **RabbitMQ** | Queue with exchanges | Depends on exchange and queues | Usually per queue | No Kafka-style replay by default | Flexible routing and reliable work queues |
 
