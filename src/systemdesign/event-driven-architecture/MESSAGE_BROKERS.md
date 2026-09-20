@@ -141,7 +141,7 @@ offset 3: OrderDelivered(orderId=123)
 
 It does not insert the new event in the middle or rewrite offset 1. This makes Kafka fast and makes replay possible because consumers can say, "start reading again from offset 0" or "continue from offset 3."
 
-Related term: **log compaction** is a Kafka cleanup/retention mode, described again under "Retention and replay," that keeps the latest message for each key instead of keeping every old message forever. For example, a compacted `latest-stock-level` topic can keep the newest stock value for each `variantId`.
+Related term: **log compaction** is a Kafka cleanup/retention mode that keeps the latest message for each key instead of keeping every old message forever; see [Retention and replay](#retention-and-replay). For example, a compacted `latest-stock-level` topic can keep the newest stock value for each `variantId`.
 
 This does **not** mean Kafka is a normal relational database. Kafka stores event records and metadata; it is optimized for sequential event storage and delivery. A database is optimized for querying and updating current application state. Many systems use both:
 
@@ -251,7 +251,7 @@ Important rule:
 
 > Inside one consumer group, a partition is assigned to at most one consumer at a time.
 
-That prevents two workers in the same service from processing the same partition messages as duplicate work.
+This prevents two workers in the same service from processing the same partition's messages, which would duplicate work.
 
 But different consumer groups are independent:
 
@@ -411,7 +411,7 @@ This is what "good for task/work distribution" means: many workers can share a b
 
 Use SQS for:
 
-- Sending emails in background.
+- Sending emails in the background.
 - Processing uploaded files.
 - Running retryable jobs.
 - Decoupling a web request from slow work.
