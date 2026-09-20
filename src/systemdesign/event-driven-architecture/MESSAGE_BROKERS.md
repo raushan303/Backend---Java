@@ -188,10 +188,10 @@ Partition 1: [0] [1] [2] [3]
 Partition 2: [0] [1] [2] [3]
 ```
 
-Kafka chooses the partition by:
+The producer's Kafka client chooses the partition by:
 
 - a message key, commonly hashed, such as `orderId`; or
-- round-robin/default partitioning if no key is provided; or
+- the default partitioner if no key is provided (modern clients use sticky batching for efficiency); or
 - an explicit partition chosen by the producer.
 
 Example using `orderId` as the key:
@@ -416,7 +416,7 @@ Use SQS for:
 - Running retryable jobs.
 - Decoupling a web request from slow work.
 
-SQS messages are deleted after successful processing. SQS is not meant to be a long-term replayable event history like Kafka. SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
+After a worker successfully processes an SQS message, it explicitly deletes the message with `DeleteMessage`; otherwise, the message can become visible again and be retried. SQS is not meant to be a long-term replayable event history like Kafka. SQS also supports a **Dead-Letter Queue (DLQ)**: a separate queue where messages can be moved after they fail processing too many times, so teams can inspect or replay the failed work later.
 
 ### SNS: pub-sub fan-out
 
