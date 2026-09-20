@@ -336,7 +336,7 @@ orders partition 0 copies:
 - Broker 3: follower copy
 ```
 
-Producers always write to the leader copy, and consumers read from the leader by default. Followers keep copying data from the leader.
+Producers always write to the leader copy. Consumers read from the leader by default, though some Kafka setups can allow consumers to fetch from follower replicas for rack-aware reads. Followers keep copying data from the leader.
 
 If Broker 1 dies, Kafka can elect one follower as the new leader:
 
@@ -461,7 +461,7 @@ The producer sends a message to an exchange. The exchange decides which queue(s)
 | Exchange type | Simple meaning | Example |
 |---|---|---|
 | **Direct** | Route by exact routing key | `email` messages go to email queue |
-| **fanout** | Send to all bound queues | broadcast `OrderPlaced` to many queues |
+| **Fanout** | Send to all bound queues | broadcast `OrderPlaced` to many queues |
 | **Topic** | Route by pattern | `order.*` or `payment.failed` |
 | **Headers** | Route by message headers | route by region, format, or priority |
 
