@@ -25,8 +25,8 @@ A **message broker** sits between services:
 
 ```text
 Order Service  --->  Message Broker  --->  Email Worker
-                                  |---->  Analytics Worker
-                                  |---->  Invoice Worker
+                         |----------->  Analytics Worker
+                         |----------->  Invoice Worker
 ```
 
 A broker is usually a separate server or managed cloud service. Internally it stores messages on disk or in a replicated storage system, tracks which consumers have processed them, and delivers messages to consumers according to the broker's rules.
@@ -42,8 +42,8 @@ Think of it like a post office:
 | Term | Simple meaning | Example |
 |---|---|---|
 | **Message** | Any data sent through a broker | `SendEmail(userId=10)` |
-| **Event** | A message saying something already happened | `OrderReceived(orderId=123)` |
-| **Producer / Publisher** | The service that sends the message | `Order Service` publishes `OrderReceived` |
+| **Event** | A message saying something already happened | `OrderPlaced(orderId=123)` |
+| **Producer / Publisher** | The service that sends the message | `Order Service` publishes `OrderPlaced` |
 | **Consumer / Subscriber** | The service that reads and processes the message | `Email Service` sends an email |
 
 A useful distinction:
@@ -79,7 +79,7 @@ Common tools: **AWS SQS**, **Azure Service Bus queue**, **RabbitMQ queue**.
 In **publish-subscribe**, a producer publishes an event to a topic/channel, and multiple independent subscribers can receive it.
 
 ```text
-Order Service publishes: OrderReceived
+Order Service publishes: OrderPlaced
 
                  +--> Email Service gets it
 Topic/Event Bus --+--> Analytics Service gets it
@@ -90,7 +90,7 @@ This is useful when many systems need to react to the same business event.
 
 Real-world examples:
 
-- After `OrderReceived`, send email, update analytics, reserve inventory, and notify warehouse.
+- After `OrderPlaced`, send email, update analytics, reserve inventory, and notify warehouse.
 - After `PaymentFailed`, notify customer support and send a customer notification.
 
 Common tools: **AWS SNS**, **Azure Event Grid**, **RabbitMQ exchanges**, and also **Kafka** when different consumer groups read the same topic.
@@ -103,10 +103,10 @@ An **event streaming platform** stores events as a durable stream/history that c
 
 ```text
 Kafka topic: orders
-[0] OrderReceived(123)
+[0] OrderPlaced(123)
 [1] OrderAccepted(123)
 [2] OrderShipped(123)
-[3] OrderReceived(124)
+[3] OrderPlaced(124)
 ```
 
 Consumers do not necessarily remove messages when they read them. The broker keeps events for a configured retention period, such as 7 days, 30 days, or sometimes much longer.
@@ -128,7 +128,7 @@ Example:
 
 ```text
 orders partition 0
-offset 0: OrderReceived(orderId=123)
+offset 0: OrderPlaced(orderId=123)
 offset 1: OrderAccepted(orderId=123)
 offset 2: OrderShipped(orderId=123)
 ```
@@ -234,7 +234,7 @@ An **offset** is the position number of a message inside one partition.
 
 ```text
 Partition 0
-Offset 0: OrderReceived(456)
+Offset 0: OrderPlaced(456)
 Offset 1: OrderAccepted(456)
 Offset 2: OrderShipped(456)
 ```
@@ -296,7 +296,7 @@ If all events for `orderId=123` use the same key, they go to the same partition:
 
 ```text
 Partition 1
-Offset 10: OrderReceived(123)
+Offset 10: OrderPlaced(123)
 Offset 11: OrderAccepted(123)
 Offset 12: OrderShipped(123)
 ```
@@ -306,8 +306,8 @@ A consumer reading partition 1 sees those events in that order.
 But Kafka does not guarantee total order across different partitions:
 
 ```text
-Partition 0: OrderReceived(456), OrderAccepted(456)
-Partition 1: OrderReceived(123), OrderAccepted(123)
+Partition 0: OrderPlaced(456), OrderAccepted(456)
+Partition 1: OrderPlaced(123), OrderAccepted(123)
 ```
 
 There is no single global order between partition 0 and partition 1. That is usually fine because order 123 and order 456 are different business entities.
@@ -316,10 +316,10 @@ So the ordering issue usually means **business ordering for the same entity**, n
 
 Example:
 
-- Bad: `OrderAccepted(123)` is processed before `OrderReceived(123)`.
+- Bad: `OrderAccepted(123)` is processed before `OrderPlaced(123)`.
 - Good: use `orderId=123` as the Kafka key so all events for order 123 stay in one partition.
 
-For notifications, if a user must receive `OrderReceived` before `OrderAccepted` for the same order, key by `orderId` or another key that represents the ordering boundary.
+For notifications, if a user must receive `OrderPlaced` before `OrderAccepted` for the same order, key by `orderId` or another key that represents the ordering boundary.
 
 ### Replication: "each partition is copied across multiple brokers"
 
@@ -369,7 +369,7 @@ Imagine a food delivery app.
 `Order Service` publishes events to topic `orders`:
 
 ```text
-OrderReceived(orderId=123)
+OrderPlaced(orderId=123)
 OrderAccepted(orderId=123)
 DriverAssigned(orderId=123)
 OrderPickedUp(orderId=123)
@@ -455,7 +455,7 @@ The producer sends a message to an exchange. The exchange decides which queue(s)
 | Exchange type | Simple meaning | Example |
 |---|---|---|
 | **Direct** | Route by exact routing key | `email` messages go to email queue |
-| **Fanout** | Send to all bound queues | broadcast `OrderReceived` to many queues |
+| **Fanout** | Send to all bound queues | broadcast `OrderPlaced` to many queues |
 | **Topic** | Route by pattern | `order.*` or `payment.failed` |
 | **Headers** | Route by message headers | route by region, format, or priority |
 
@@ -476,9 +476,9 @@ RabbitMQ is often chosen when you need flexible routing rules, classic work queu
 |---|---|---|---|---|---|
 | **Kafka** | Streaming log | Many consumer groups can each read the same events | Within a partition | Yes, within retention | High-volume event streams, analytics, event-driven microservices |
 | **Azure Event Hub** | Streaming log | Many consumer groups can each read the same events | Within a partition | Yes, within retention | Kafka-like cloud event ingestion |
-| **SQS** | Queue | One worker per message | Standard: no strict order; FIFO: ordered | No long-term replay after delete | Background jobs and task distribution |
+| **SQS** | Queue | Typically one worker per message; at-least-once delivery means duplicates are possible | Standard: no strict order; FIFO: ordered | No long-term replay after delete | Background jobs and task distribution |
 | **SNS** | Pub-sub topic | Many subscribers | No strong ordering | No | Fan-out notifications |
-| **Azure Service Bus** | Queue or topic/subscription | Queue: one worker; topic: many subscriptions | Sessions can preserve order | Not a Kafka-style replay log | Enterprise queues/pub-sub |
+| **Azure Service Bus** | Queue or topic/subscription | Queue: typically one worker; topic: many subscriptions | Sessions can preserve order | Not a Kafka-style replay log | Enterprise queues/pub-sub |
 | **RabbitMQ** | Queue with exchanges | Depends on exchange and queues | Usually per queue | No Kafka-style replay by default | Flexible routing and reliable work queues |
 
 ## 11. How to choose
