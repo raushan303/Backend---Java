@@ -183,8 +183,8 @@ A topic can have multiple partitions:
 ```text
 Topic: orders
 
-Partition 0: offsets 0,1,2,3 (its own messages)
-Partition 1: offsets 0,1,2,3 (its own messages)
+Partition 0: offsets 0,1,2   (its own messages)
+Partition 1: offsets 0,1     (its own messages)
 Partition 2: offsets 0,1,2,3 (its own messages)
 ```
 
@@ -336,7 +336,7 @@ orders partition 0 copies:
 - Broker 3: follower copy
 ```
 
-By default, producers and consumers talk to the leader copy. Followers keep copying data from the leader.
+Producers always write to the leader copy, and consumers read from the leader by default. Followers keep copying data from the leader.
 
 If Broker 1 dies, Kafka can elect one follower as the new leader:
 
@@ -461,7 +461,7 @@ The producer sends a message to an exchange. The exchange decides which queue(s)
 | Exchange type | Simple meaning | Example |
 |---|---|---|
 | **Direct** | Route by exact routing key | `email` messages go to email queue |
-| **Fanout** | Send to all bound queues | broadcast `OrderPlaced` to many queues |
+| **fanout** | Send to all bound queues | broadcast `OrderPlaced` to many queues |
 | **Topic** | Route by pattern | `order.*` or `payment.failed` |
 | **Headers** | Route by message headers | route by region, format, or priority |
 
