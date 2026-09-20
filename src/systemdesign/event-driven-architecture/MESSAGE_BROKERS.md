@@ -25,8 +25,8 @@ A **message broker** sits between services:
 
 ```text
 Order Service  --->  Message Broker  --->  Email Worker
-                         |----------->  Analytics Worker
-                         |----------->  Invoice Worker
+Order Service  --->  Message Broker  --->  Analytics Worker
+Order Service  --->  Message Broker  --->  Invoice Worker
 ```
 
 A broker is usually a separate server or managed cloud service. Internally it stores messages on disk or in a replicated storage system, tracks which consumers have processed them, and delivers messages to consumers according to the broker's rules.
@@ -81,9 +81,9 @@ In **publish-subscribe**, a producer publishes an event to a topic/channel, and 
 ```text
 Order Service publishes: OrderPlaced
 
-                 +--> Email Service gets it
-Topic/Event Bus --+--> Analytics Service gets it
-                 +--> Invoice Service gets it
+Topic/Event Bus ---> Email Service gets it
+Topic/Event Bus ---> Analytics Service gets it
+Topic/Event Bus ---> Invoice Service gets it
 ```
 
 This is useful when many systems need to react to the same business event.
@@ -216,7 +216,7 @@ Partition 1 ---> Consumer B
 Partition 2 ---> Consumer C
 ```
 
-If the same group has more consumers than partitions, extra consumers sit idle:
+In Kafka, partitions are the unit of parallelism inside a consumer group. If the same group has more consumers than partitions, extra consumers sit idle:
 
 ```text
 3 partitions, 5 consumers in same group
@@ -445,7 +445,7 @@ A core RabbitMQ concept is the **exchange**.
 
 ```text
 Producer ---> Exchange ---> Queue A ---> Consumer A
-                       |--> Queue B ---> Consumer B
+Producer ---> Exchange ---> Queue B ---> Consumer B
 ```
 
 The producer sends a message to an exchange. The exchange decides which queue(s) should receive the message.
