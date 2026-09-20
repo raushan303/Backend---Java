@@ -141,7 +141,7 @@ offset 3: OrderDelivered(orderId=123)
 
 It does not insert the new event in the middle or rewrite offset 1. This makes Kafka fast and makes replay possible because consumers can say, "start reading again from offset 0" or "continue from offset 3."
 
-Related term: **log compaction** is a Kafka cleanup mode that keeps the latest message for each key instead of keeping every old message forever. For example, a compacted `latest-stock-level` topic can keep the newest stock value for each `variantId`.
+Related term: **log compaction** is a Kafka cleanup/retention mode, described again under "Retention and replay," that keeps the latest message for each key instead of keeping every old message forever. For example, a compacted `latest-stock-level` topic can keep the newest stock value for each `variantId`.
 
 This does **not** mean Kafka is a normal relational database. Kafka stores event records and metadata; it is optimized for sequential event storage and delivery. A database is optimized for querying and updating current application state. Many systems use both:
 
@@ -433,7 +433,7 @@ Order Service ---> SNS topic: order-events
                        |---> HTTPS endpoint for Partner System
 ```
 
-SNS is useful when one event should be delivered to multiple subscribers.
+SNS is useful when one event should be delivered to multiple subscribers. Standard SNS topics do not provide strong ordering; SNS FIFO topics can provide ordered, deduplicated fan-out when subscribers and throughput needs fit FIFO limits.
 
 A common AWS pattern is:
 
@@ -499,6 +499,7 @@ Use **SNS / Event Grid / RabbitMQ fanout** when:
 
 - One event should notify multiple subscribers.
 - You do not need long-term replay.
+- You usually do not need strict ordering, or SNS FIFO topics fit your ordering and throughput needs.
 - You want simple fan-out.
 
 Use **Kafka / Azure Event Hub** when:
