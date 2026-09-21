@@ -2,10 +2,7 @@ package LLD.ParkingLot.implementation;
 
 import LLD.ParkingLot.implementation.gate.EntranceGate;
 import LLD.ParkingLot.implementation.gate.ExitGate;
-import LLD.ParkingLot.implementation.manager.FourWheelerParkingSpotManager;
-import LLD.ParkingLot.implementation.manager.ParkingSpotManager;
 import LLD.ParkingLot.implementation.manager.ParkingSpotManagerFactory;
-import LLD.ParkingLot.implementation.manager.TwoWheelerParkingSpotManager;
 import LLD.ParkingLot.implementation.model.ExitReceipt;
 import LLD.ParkingLot.implementation.model.ParkingSpot;
 import LLD.ParkingLot.implementation.model.ParkingSpotType;
@@ -15,12 +12,10 @@ import LLD.ParkingLot.implementation.model.Vehicle;
 import LLD.ParkingLot.implementation.payment.PaymentProcessorFactory;
 import LLD.ParkingLot.implementation.pricing.CostComputationFactory;
 import LLD.ParkingLot.implementation.service.TicketService;
-import LLD.ParkingLot.implementation.strategy.parking.NearestToEntranceStrategy;
 
 import java.time.Clock;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -47,12 +42,7 @@ public final class ParkingLot {
         Objects.requireNonNull(parkingSpots, "Parking spots cannot be null");
         Objects.requireNonNull(clock, "Clock cannot be null");
 
-        NearestToEntranceStrategy allocationStrategy = new NearestToEntranceStrategy();
-        ParkingSpotManager twoWheelerManager = new TwoWheelerParkingSpotManager(
-                spotsOfType(parkingSpots, ParkingSpotType.TWO_WHEELER), allocationStrategy);
-        ParkingSpotManager fourWheelerManager = new FourWheelerParkingSpotManager(
-                spotsOfType(parkingSpots, ParkingSpotType.FOUR_WHEELER), allocationStrategy);
-        managerFactory = new ParkingSpotManagerFactory(List.of(twoWheelerManager, fourWheelerManager));
+        managerFactory = new ParkingSpotManagerFactory(parkingSpots);
 
         TicketService ticketService = new TicketService();
         CostComputationFactory costComputationFactory = new CostComputationFactory();
@@ -71,11 +61,6 @@ public final class ParkingLot {
 
     public long availableSpots(ParkingSpotType spotType) {
         return managerFactory.getManager(spotType).availableSpotCount();
-    }
-
-    private List<ParkingSpot> spotsOfType(
-            Collection<? extends ParkingSpot> parkingSpots, ParkingSpotType type) {
-        return parkingSpots.stream().filter(spot -> spot.getType() == type).map(spot -> (ParkingSpot) spot).toList();
     }
 
     private Map<String, EntranceGate> createEntranceGates(
