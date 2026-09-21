@@ -44,6 +44,10 @@ Backend---Java/
 
 ## How to use this repo
 
+New to Java syntax but already familiar with OOP? Start with the
+[`src/Java` syntax guide](./src/Java/README.md). It explains the Java features
+used throughout the design-pattern and parking-lot code.
+
 ### 1. Start with design patterns
 Create small examples that:
 - define classes and interfaces
