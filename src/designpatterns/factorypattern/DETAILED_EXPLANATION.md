@@ -4,6 +4,17 @@
 
 Creating concrete objects directly in many clients spreads construction decisions across the application. Those clients must change whenever product selection or construction changes.
 
+For example, this decision does not belong in every class that wants to drive a vehicle:
+
+```java
+Vehicle vehicle;
+switch (vehicleType) {
+	case CAR -> vehicle = new Car();
+	case BIKE -> vehicle = new Bike();
+	case TRUCK -> vehicle = new Truck();
+}
+```
+
 The Factory Pattern moves that decision into a dedicated factory and returns products through a shared interface.
 
 ## 2) Problem statement
@@ -55,7 +66,7 @@ factorypattern/
 
 ## 6) Error handling
 
-`VehicleFactory` throws `IllegalArgumentException` when the requested type is `null`. The enum limits normal calls to supported vehicle types.
+`VehicleFactory` throws `IllegalArgumentException` when the requested type is `null`. Using `VehicleType` instead of strings prevents values such as `"CARR"` from reaching the factory, because the compiler limits callers to the declared enum values.
 
 ## 7) Benefits
 
@@ -74,7 +85,13 @@ factorypattern/
 
 This Factory example selects one product, such as a `Car` or `Truck`, behind one `Vehicle` interface. Abstract Factory creates a complete family of related products, such as a matching Chair and Sofa, through several product interfaces.
 
-## 10) Real-world use cases
+## 10) Simple Factory vs. Factory Method
+
+This repository implements a **Simple Factory**. The caller invokes one concrete `VehicleFactory`, and its `switch` decides which object to create.
+
+In the classic **Factory Method** pattern, a base class defines a creation method and subclasses decide which product it returns. Use that variant when subclasses should control creation as part of a larger workflow. Both approaches keep concrete construction away from the code that merely uses the product.
+
+## 11) Real-world use cases
 
 - selecting parsers by file type
 - creating notifications by channel

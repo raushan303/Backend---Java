@@ -101,11 +101,11 @@ Use CDC when centralized change capture is preferred or writer services cannot b
 
 ## How this maps to Observer Pattern
 
-- DB tables replace in-memory subscriber lists
-- event bus/queue replaces direct in-memory `notify()` loops
-- distributed workers act as observers
+- the inventory change is the event that interested consumers react to
+- the back-in-stock worker plays a role similar to an observer
+- the event bus routes events instead of an object directly calling registered observers
 
-So concept is same as Observer Pattern, but production implementation uses persistence + messaging + background consumers.
+The motivation is similar to Observer, but this is more precisely a **distributed pub/sub** design. Unlike the in-memory Observer example, producers and consumers do not hold object references to each other. A production broker also introduces concerns such as retries, duplicate delivery, ordering, persistence, and dead-letter queues.
 
 ---
 

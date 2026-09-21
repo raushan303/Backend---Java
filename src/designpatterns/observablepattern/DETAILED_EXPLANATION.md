@@ -6,6 +6,17 @@ The Observable Pattern is used when one object (publisher) changes state and man
 
 Without this pattern, the publisher often depends directly on multiple channels (`if-else` blocks for email, mobile, push, etc.), making code rigid.
 
+```java
+void setStockPrice(double newPrice) {
+        stockPrice = newPrice;
+        emailAlert.send(newPrice);
+        mobileAlert.send(newPrice);
+        pushAlert.send(newPrice);
+}
+```
+
+Adding or removing a channel now requires editing the stock class. The class has both stock responsibilities and notification-channel responsibilities.
+
 With this pattern, subscribers register once, and the publisher only notifies through an abstraction.
 
 ---
@@ -99,6 +110,8 @@ observablepattern/
 6. Each observer receives update() and reads current price via getStockPrice().
 ```
 
+This implementation uses the **pull model**: `update()` only signals that something changed, and each observer calls `getStockPrice()` for the current value. A **push model** would use a method such as `update(double newPrice)` and include the changed data in the notification. Pull gives observers access to current publisher state; push can make the observer less dependent on the publisher.
+
 ---
 
 ## 5) Error handling choices
@@ -152,3 +165,11 @@ These checks prevent invalid state and unnecessary notification noise.
 - Add asynchronous notification dispatch
 
 The current design already supports these enhancements while keeping existing contracts clear.
+
+## 10) Observer vs. event bus or pub/sub
+
+The core example is in-memory Observer: `StocksObservable` stores direct references to observer objects and calls them synchronously in the same process.
+
+A message broker such as Kafka or RabbitMQ implements distributed pub/sub. Publishers and subscribers usually do not hold references to each other, messages may be persisted, and delivery can be asynchronous or retried. Both designs notify interested consumers, but their runtime guarantees and failure modes are different.
+
+Use Observer for relationships among objects inside one application. Consider a broker when producers and consumers run independently, need durable delivery, or must scale separately.
