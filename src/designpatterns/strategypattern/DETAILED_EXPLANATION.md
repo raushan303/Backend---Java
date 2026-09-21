@@ -5,9 +5,11 @@
 The Strategy Pattern is a behavioral design pattern that defines a family of algorithms, puts each one in a separate class, and makes them interchangeable at runtime.
 
 In simpler words:
-- same task
-- different ways to do it
-- choose the behavior when needed
+- the context has one job to perform, such as taking a payment
+- several objects can perform that job, such as card, UPI, or cash handlers
+- the caller gives the context the handler it should use
+
+The phrase "different ways to do the same task" means that every strategy satisfies the same contract, not that their internal steps are identical. Card payment may validate a card, while UPI payment may request approval from a UPI app. Both can still satisfy `pay(amount)` from the checkout application's point of view.
 
 ---
 
@@ -34,6 +36,12 @@ This works for small examples, but as the system grows, it becomes messy.
 - the class starts handling too many responsibilities
 
 Strategy Pattern solves this by moving each behavior into its own class.
+
+### Why inheritance alone does not solve it
+
+Putting all payment code in a parent checkout class gives the parent behavior that is not common to every checkout. Creating `CardCheckout`, `UpiCheckout`, and `CashCheckout` subclasses duplicates the parts of checkout that do not vary.
+
+Strategy separates the changing behavior from the class that uses it. `App` **has a** `PaymentStrategy`; it does not need a subclass for each payment method. Inheritance can still be used inside a group of closely related strategies when they genuinely share implementation, as shown later in this guide.
 
 ---
 

@@ -8,6 +8,13 @@ Without this pattern, each combination often leads to subclass explosion such as
 
 With this pattern, each add-on is wrapped around the same base abstraction, so behavior can be composed dynamically.
 
+```java
+Coffee coffee = new SugarDecorator(
+   new MilkDecorator(new BasicCoffee()));
+```
+
+Read this from the inside out: make a basic coffee, wrap it with milk, then wrap that result with sugar. The final object is still a `Coffee`.
+
 ---
 
 ## 2) Problem statement
@@ -94,6 +101,8 @@ decoratorpattern/
 6. Final client call to getDescription() / getCost() returns the combined result.
 ```
 
+For `getCost()`, the outer decorator asks its wrapped object for a cost and adds its own amount. The call travels inward to `BasicCoffee`; the accumulated result travels back outward. This delegation is why each add-on only needs to know its own price.
+
 ---
 
 ## 6) Error handling choices
@@ -134,6 +143,12 @@ These checks help prevent invalid composition and keep runtime decoration predic
 3. Validate wrapped dependencies before composing.
 4. Prefer composition at runtime over many inheritance combinations.
 5. Use decorators when features are optional and combinable.
+
+### Decorator compared with nearby ideas
+
+- **Subclassing:** fixes behavior in a class definition; Decorator combines behavior per object at runtime.
+- **Builder:** helps construct a final object step by step; Decorator produces wrappers that continue to share the component interface.
+- **Adapter:** wraps an object to expose a different interface; Decorator preserves the same interface and adds behavior.
 
 ---
 

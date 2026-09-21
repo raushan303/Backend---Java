@@ -4,6 +4,13 @@
 
 Applications sometimes use several related product types that must remain compatible. Creating each concrete product separately can accidentally mix families and couples the client to many classes.
 
+```java
+Chair chair = new ModernChair();
+Sofa sofa = new VictorianSofa(); // Valid types, invalid combination.
+```
+
+The compiler cannot identify that design mistake because both objects implement the correct individual interfaces. The missing rule is that they must come from the same family.
+
 Abstract Factory gives the client one factory interface for creating a complete, matching product family.
 
 ## 2) Problem statement
@@ -77,12 +84,18 @@ Each concrete factory owns all creation methods for one style. `ModernFurnitureF
 ## 9) Tradeoffs
 
 - adding a new family is easy because it needs another concrete factory
-- adding a new product type is harder because every factory must implement a new creation method
+- adding a new product type is harder: adding `Table` requires `createTable()` in `FurnitureFactory`, `ModernFurnitureFactory`, and `VictorianFurnitureFactory`
 - the number of interfaces and classes is unnecessary for very small systems
 
 ## 10) Abstract Factory vs. Factory
 
 Factory focuses on creating one product behind one product interface. Abstract Factory creates multiple related product types behind multiple product interfaces and guarantees that they belong to the same family.
+
+| Question | Factory example | Abstract Factory example |
+| --- | --- | --- |
+| What does the caller choose? | A vehicle type | A furniture family |
+| What comes from that choice? | One `Vehicle` | A matching `Chair` and `Sofa` |
+| Main rule being centralized | Which class to construct | Which products are compatible |
 
 ## 11) Real-world use cases
 
