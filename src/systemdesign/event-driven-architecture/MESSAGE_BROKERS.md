@@ -74,6 +74,37 @@ Real-world examples:
 
 Common tools: **AWS SQS**, **Azure Service Bus queue**, **RabbitMQ queue**.
 
+#### Who owns the queue, and who removes a message?
+
+There is still a **broker** in the simple queue model. The queue is a data structure managed by that broker, not by the producer or worker:
+
+```text
+Producer ---> Broker [queue: job1, job2, job3] ---> Worker
+```
+
+The normal flow is:
+
+1. The producer sends a message to the broker.
+2. The broker stores it in the queue.
+3. A worker receives the message and processes it.
+4. After success, the worker sends an acknowledgment or delete request.
+5. The broker removes the message or marks it as completed.
+
+The worker does not directly edit the queue's storage. It tells the broker that processing succeeded. For example, RabbitMQ consumers send an acknowledgment (`ack`), while an SQS worker calls `DeleteMessage`.
+
+If the worker crashes before acknowledging, the broker can deliver the message again. This is why queue consumers should usually be idempotent. With SQS, the message is temporarily hidden by a visibility timeout and becomes visible again if it is not deleted. With RabbitMQ, an unacknowledged message is requeued when the consumer connection closes.
+
+#### What if the queue grows or the broker crashes?
+
+Producer and consumer scaling are separate:
+
+- If messages arrive faster than workers process them, the queue backlog grows. Add more instances of the same worker so they consume in parallel.
+- The broker itself must also have enough storage, network, and processing capacity. Managed services such as SQS scale much of this infrastructure automatically. Self-managed brokers such as RabbitMQ require capacity planning and clustering.
+- Persistence depends on the product and configuration. A durable queue alone is not always enough; messages may also need to be published as persistent, and the producer may need to wait for broker confirmation.
+- For broker failure tolerance, messages must be replicated across broker nodes or availability zones. RabbitMQ quorum queues replicate messages across nodes. A non-replicated queue on one failed machine may be unavailable and can lose data if its disk is lost.
+
+No broker can promise survival under every failure without the correct durability, replication, and acknowledgment settings.
+
 ### B. Pub-sub / event bus: every subscriber gets the event
 
 In **publish-subscribe**, a producer publishes an event to a topic/channel, and multiple independent subscribers can receive it.
@@ -204,6 +235,20 @@ Order 789 events ---> partition 2
 
 Using a stable key is important because it keeps related events in the same partition.
 
+### Which Kafka broker receives a producer write?
+
+The producer sends records to the Kafka **broker that is the leader for the chosen partition**. Kafka does not normally pass every record through one central broker:
+
+```text
+orders partition 0 leader: Broker 1 <--- producer writes for partition 0
+orders partition 1 leader: Broker 2 <--- producer writes for partition 1
+orders partition 2 leader: Broker 3 <--- producer writes for partition 2
+```
+
+The producer client first gets cluster metadata, chooses a partition, and sends the record directly to that partition's leader. At one moment, each partition has only one leader accepting writes for that partition. Its follower replicas on other brokers copy those writes.
+
+Multiple brokers absolutely are used for scaling: leaders for different partitions are distributed across brokers, so those brokers can accept writes in parallel. One partition is still limited by its single leader, so increasing write parallelism generally requires enough partitions and distributing their leaders across brokers. Merely adding a broker does not help until partitions or their leaders are assigned to it.
+
 ### Why partitions exist
 
 Partitions provide parallelism and scale.
@@ -270,6 +315,8 @@ Partition 1 ---> Analytics Consumer B
 Both services can read all `orders` events, but each service scales its own workers separately.
 
 Consumer groups are not mainly about making every consumer receive every message. They are about distributing partitions of the **same topic** among instances of the **same logical service**, so the service can scale without duplicating the same work inside that group.
+
+So yes: consumer groups provide **consumer-side scaling**. For example, three running instances of `NotificationWorker` can use the same group ID, and Kafka assigns partitions among them. They are separate instances of the same logical worker/service. If one instance fails, Kafka reassigns its partitions to surviving instances. Maximum active parallelism for that group is bounded by the number of partitions.
 
 ### How do topics and partitions relate?
 
@@ -447,14 +494,17 @@ SNS does the fan-out. SQS gives each subscriber its own durable queue and retry 
 
 RabbitMQ is a message broker often used for queues and routing.
 
-A core RabbitMQ concept is the **exchange**.
+A core RabbitMQ concept is the **exchange**. The exchange is **not the broker**; it is a routing component managed inside a RabbitMQ broker.
 
 ```text
-Producer ---> Exchange ---> Queue A ---> Consumer A
-Producer ---> Exchange ---> Queue B ---> Consumer B
+Producer ---> RabbitMQ broker
+            |
+          Exchange
+            |---> Queue A ---> Consumer A
+            |---> Queue B ---> Consumer B
 ```
 
-The producer sends a message to an exchange. The exchange decides which queue(s) should receive the message.
+The producer connects to the RabbitMQ broker and publishes a message to an exchange. The exchange applies its bindings and routing rules to decide which queue or queues receive the message. The broker manages the exchange, queues, message storage, delivery, acknowledgments, and connections. An exchange routes messages; it does not act as a separate server or normally store the messages itself.
 
 "Flexible routing/exchanges" means RabbitMQ can route messages in different ways:
 
