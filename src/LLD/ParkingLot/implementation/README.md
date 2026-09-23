@@ -90,6 +90,23 @@ implementation/
 
 `ParkingLot` builds and owns the shared object graph, registers gates, and exposes a compact API. It is deliberately not a Singleton; an application may operate several parking lots or create isolated lots in tests.
 
+## Race Conditions During Spot Allocation
+
+Two entrance gates may try to allocate a spot at the same time. Selecting a spot and occupying it must therefore be one atomic operation; otherwise, both gates could observe the same spot as available before either one marks it occupied.
+
+In this in-memory implementation, `ParkingSpotManager.allocateSpot()` is `synchronized`. All entrance gates created by one `ParkingLot` share the same manager instances, so only one thread at a time can select and occupy a spot of a given type. `ParkingSpot.park()` is also synchronized and checks that the selected spot is still empty as a defensive safeguard.
+
+No temporary hold is needed for the current workflow. Unlike movie-seat booking, the driver does not select a spot and spend time deciding or paying before confirmation. The manager immediately selects and occupies the spot, producing a direct `AVAILABLE -> OCCUPIED` transition. A separate `HELD` state and expiration policy would become useful only for features such as advance reservations or user-selected spots.
+
+Java synchronization protects only one JVM. In a production deployment with multiple application servers, each server has separate objects and locks, so the database must be the source of truth. Common approaches include:
+
+- An atomic conditional update such as `UPDATE parking_spot SET status = 'OCCUPIED' WHERE id = ? AND status = 'AVAILABLE'`, treating an affected-row count of zero as a lost allocation race.
+- A transaction that selects an available spot with `SELECT ... FOR UPDATE SKIP LOCKED`, marks it occupied, and creates the ticket before committing.
+- A database constraint preventing more than one active allocation for a spot.
+- An idempotency key preventing a retried entrance request from creating a second ticket.
+
+A distributed lock can reduce contention, but it should not replace database transactions and constraints. The database remains the final authority that prevents two servers from assigning the same spot.
+
 ## Deliberate Design Corrections
 
 The source transcript describes `findParkingSpot()` followed by `parkVehicle()`. Exposing these as separate normal operations permits two threads to find the same free spot. This implementation exposes `allocateSpot()`, which performs selection and occupation under one manager lock.
